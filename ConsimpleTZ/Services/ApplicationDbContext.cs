@@ -10,16 +10,29 @@ namespace ConsimpleTZ.Services
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
-        public DbSet<PurchaseItem> PurchaseItems { get; set; }
+        public DbSet<PurchaseProduct> PurchaseProducts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Customer>().ToTable("Customers");
-            modelBuilder.Entity<Product>().ToTable("Products");
-            modelBuilder.Entity<Purchase>().ToTable("Purchases");
-            modelBuilder.Entity<PurchaseItem>().ToTable("PurchaseItems");
+            modelBuilder.Entity<Purchase>()
+                .HasOne(p => p.Customer)
+                .WithMany(c => c.Purchases)
+                .HasForeignKey(p => p.CustomerID);
+
+            modelBuilder.Entity<PurchaseProduct>()
+                .HasKey(pp => new { pp.PurchaseID, pp.ProductID }); 
+
+            modelBuilder.Entity<PurchaseProduct>()
+                .HasOne(pp => pp.Purchase)
+                .WithMany(p => p.PurchaseProducts)
+                .HasForeignKey(pp => pp.PurchaseID); 
+
+            modelBuilder.Entity<PurchaseProduct>()
+                .HasOne(pp => pp.Product)
+                .WithMany(p => p.PurchaseProducts)
+                .HasForeignKey(pp => pp.ProductID); 
         }
     }
 }
